@@ -4,7 +4,6 @@ services:
   fluent-bit:
     image: cr.fluentbit.io/fluent/fluent-bit:3.2.2
     restart: always
-    network_mode: host
     environment:
       ES_HOST: "10.150.1.87"
       ES_PORT: "9200"
@@ -14,18 +13,13 @@ services:
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - ./strip.lua:/fluent-bit/etc/strip.lua:ro
+      - /etc/docker/logs:/etc/docker/logs:ro
+      - fluentbit-state:/fluent-bit/state
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "2"
 
-  # ตัวอย่าง: ใส่บล็อก logging นี้ใน service ของแอป (เช่น ithq-kkl-pubnub-bun)
-  # เพื่อไม่ให้ Docker เก็บ *-json.log ใน /var/lib/docker/containers
-  #
-  # logging:
-  #   driver: fluentd
-  #   options:
-  #     fluentd-address: "127.0.0.1:24224"
-  #     fluentd-async: "true"
-  #     tag: "docker.{{.Name}}"
+volumes:
+  fluentbit-state:
